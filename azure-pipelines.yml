@@ -1,19 +1,43 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
+pool: my_personal_computer
+ 
 trigger:
-- master
-
-pool:
-  vmImage: windows-latest
-
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+  branches:
+    include:
+      - AzureDevOpsHomeTask
+ 
+schedules:
+  - cron: '0 9 * * *'
+    displayName: Daily morning build
+    branches:
+      include:
+        - AzureDevOpsHomeTask
+ 
+pr:
+ branches:
+   include:
+     - AzureDevOpsHomeTask
+ 
+stages:
+- stage: API_Tests
+  condition: eq(variables['Build.Reason'], 'Manual')
+  jobs:
+  - job: API_Testing
+    steps:
+    - script: # Commands to run API tests
+ 
+- stage: UI_Tests
+  condition: eq(variables['Build.Reason'], 'Manual')
+  jobs:
+  - job: UI_Testing
+    steps:
+    - script: # Commands to run UI tests
+      displayName: Run UI tests
+    - task: PublishTestResults@2 # Publish test results
+    - task: PublishBuildArtifacts@1 # Publish screenshots as artifacts
+      displayName: Publish Screenshots
+ 
+ 
+    # Even if API tests fail, UI tests will still run because they are in a separate stage
+    - task: PublishTestResults@2 # Publish test results
+    - task: PublishBuildArtifacts@1 # Publish screenshots as artifacts
+      displayName: Publish Screenshots
